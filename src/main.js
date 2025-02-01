@@ -24,15 +24,23 @@ const game = new Phaser.Game(config);
 let ball;
 let cursors;
 
-function preload() {
-    // Load assets (none needed for basic shape)
-}
-
 function resizeGame(gameObject) {
     const w = window.innerWidth;
     const h = window.innerHeight;
     game.scale.resize(w, h);
     gameObject.physics.world.setBounds(0, 0, w, h);
+}
+
+// Note to self: this part onwards (below this comment) are functions that sits in a Phaser.scene module and is connected via 
+// scene: {
+//     preload: preload,
+//     create: create,
+//     update: update
+// }
+// Part of the config. So "this" refers to shit created in Phaser.scene object that is with Phaser.io library.
+
+function preload() {
+    // Load assets (none needed for basic shape)
 }
 
 function create() {
