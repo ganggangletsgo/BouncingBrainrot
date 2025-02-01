@@ -9,7 +9,7 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 0 },
+            gravity: { y: 300 },
             debug: false
         }
     },
@@ -28,16 +28,26 @@ function preload() {
     // Load assets (none needed for basic shape)
 }
 
+function resizeGame(gameObject) {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    game.scale.resize(w, h);
+    gameObject.physics.world.setBounds(0, 0, w, h);
+}
+
 function create() {
-    // Create ball
-    ball = this.physics.add.sprite(400, 300, 'ball');
-    
-    // Create ball graphics
+    // Set game size
+    window.addEventListener('resize', () => resizeGame(this));
+
+    // Create red ball graphics
     const ballGraphics = this.add.graphics();
     ballGraphics.fillStyle(0xff0000, 1);
-    ballGraphics.fillCircle(0, 0, 20);
+    ballGraphics.fillCircle(20, 20, 20);
     ballGraphics.generateTexture('ball', 40, 40);
     ballGraphics.destroy();
+
+    // Create ball
+    ball = this.physics.add.sprite(400, 300, 'ball');
 
     // Set ball physics properties
     ball.setBounce(1);
