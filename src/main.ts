@@ -2,14 +2,14 @@ import Phaser from 'phaser';
 
 // fix size to window size
 
-const config = {
+const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     width: window.innerWidth,
     height: window.innerHeight,
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 300 },
+            gravity: { y: 300, x: 0 },
             debug: false
         }
     },
@@ -21,9 +21,8 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
-let ball;
+let balls;
 let cursors;
-const entitiesColliderGroup = scene.physics.add.group();
 
 function resizeGame(gameObject) {
     const w = window.innerWidth;
@@ -32,7 +31,12 @@ function resizeGame(gameObject) {
     gameObject.physics.world.setBounds(0, 0, w, h);
 }
 
-function onCollideWithBall() {
+function onCollideWithBall(b1, b2) {
+    b1.destroy();
+    b2.destroy();
+}
+
+function onCollideWithWall(ball) {
 
 }
 
@@ -60,39 +64,46 @@ function create() {
     ballGraphics.destroy();
 
     // Create ball
-    ball = this.physics.add.sprite(400, 300, 'ball');
+    balls = this.physics.add.group({
+        allowGravity: true,
+        bounceX: 1,
+        bounceY: 1,
+        collideWorldBounds: true,
+        velocityY: -300,
+        velocityX: Phaser.Math.Between(-200, 200),
+    })
+    // ball = this.physics.add.sprite(400, 300, 'ball');
+    balls.createMultiple([
+        { key: 'ball', quantity: 1, setXY: { x: 200, y: 300, stepX: 100 } },
+    ])
 
-    // Set ball physics properties
-    ball.setBounce(1);
-    ball.setCollideWorldBounds(true, 1, 1, true);
-    ball.setVelocity(Phaser.Math.Between(-200, 200), -300);
+    this.physics.add.collider(balls, balls, onCollideWithBall);
 
     // Add keyboard controls
     cursors = this.input.keyboard.createCursorKeys();
 
     // Add world bound collision event
     this.physics.world.on('worldbounds', ball => {
-        let newBall = this.physics.add.sprite(400, 300, 'ball');
-
-        newBall.setBounce(1);
-        newBall.setCollideWorldBounds(true, 1, 1, true);
-        newBall.setVelocity(Phaser.Math.Between(-200, 200), -300);
+        console.log('kasjdh');
+        balls.createMultiple([
+            { key: 'ball', quantity: 1, setXY: { x: 200, y: 300, stepX: 100 } },
+        ])
     });
 
-    this.physics.world.on('collide', (gameObject1, gameObject2) => {
-        console.log('collision');
-        gameObject1.destroy();
-        gameObject2.destroy();
-        // gameObject1.emit('collide', gameObject2);
-        // gameObject2.emit('collide', gameObject1);
-    });
+    // this.physics.world.on('collide', (gameObject1, gameObject2) => {
+    //     console.log('collision');
+    //     gameObject1.destroy();
+    //     gameObject2.destroy();
+    //     // gameObject1.emit('collide', gameObject2);
+    //     // gameObject2.emit('collide', gameObject1);
+    // });
 }
 
 function update() {
     // Add simple paddle control with arrow keys
-    if (cursors.left.isDown) {
-        ball.setVelocityX(-300);
-    } else if (cursors.right.isDown) {
-        ball.setVelocityX(300);
-    }
+    // if (cursors.left.isDown) {
+    //     ball.setVelocityX(-300);
+    // } else if (cursors.right.isDown) {
+    //     ball.setVelocityX(300);
+    // }
 }
