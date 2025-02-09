@@ -1,6 +1,9 @@
 import Phaser from 'phaser';
+import * as simpleSongs from '../songs/simplesongs';
 
 // fix size to window size
+let notes
+let soundCounter = 0
 
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
@@ -37,6 +40,13 @@ function onCollideWithBall(b1, b2) {
 }
 
 function onCollideWithWall(ball) {
+    console.log("hello")
+    let note = simpleSongs.twinkleTwinkle[soundCounter % simpleSongs.twinkleTwinkle.length]
+    if (note) {
+        notes[note].play();
+    }
+    soundCounter++
+
 
 }
 
@@ -47,12 +57,55 @@ function onCollideWithWall(ball) {
 //     update: update
 // }
 // Part of the config. So "this" refers to shit created in Phaser.scene object that is with Phaser.io library.
-
-function preload() {
-    // Load assets (none needed for basic shape)
+function loadNotes(gameObject: Phaser.Scene) {
+    gameObject.load.audio('C', '../notes/c4.mp3');
+    gameObject.load.audio('C-', '../notes/c-4.mp3');
+    gameObject.load.audio('D', '../notes/d4.mp3');
+    gameObject.load.audio('D-', '../notes/d-4.mp3');
+    gameObject.load.audio('E', '../notes/e4.mp3');
+    gameObject.load.audio('F', '../notes/f4.mp3');
+    gameObject.load.audio('F-', '../notes/f-4.mp3');
+    gameObject.load.audio('G', '../notes/g4.mp3');
+    gameObject.load.audio('G-', '../notes/g-4.mp3');
+    gameObject.load.audio('A', '../notes/a4.mp3');
+    gameObject.load.audio('A-', '../notes/a-4.mp3');
+    gameObject.load.audio('B', '../notes/b4.mp3');
 }
 
+function preload() {
+    loadNotes(this)
+    console.log("hello")
+
+}
+
+
+
 function create() {
+    notes = {
+        'C': this.sound.add('C'),
+        'C-': this.sound.add('C-'),
+        'D': this.sound.add('D'),
+        'D-': this.sound.add('D-'),
+        'E': this.sound.add('E'),
+        'F': this.sound.add('F'),
+        'F-': this.sound.add('F-'),
+        'G': this.sound.add('G'),
+        'G-': this.sound.add('G-'),
+        'A': this.sound.add('A'),
+        'A-': this.sound.add('A-'),
+        'B': this.sound.add('B')
+    };
+
+
+    soundCounter = 0
+    this.input.keyboard.on('keydown-SPACE', () => {
+        let note = simpleSongs.twinkleTwinkle[soundCounter % (simpleSongs.twinkleTwinkle.length)]
+        if (note) {
+            notes[note].play();
+        }
+        soundCounter++
+    });
+
     // Set game size
     window.addEventListener('resize', () => resizeGame(this));
 
