@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import * as simpleSongs from '../songs/simplesongs';
 import MusicPlayer from './music';
+import { createBall, createRing } from './create';
 
 // fix size to window size
 const config: Phaser.Types.Core.GameConfig = {
@@ -33,16 +34,6 @@ function resizeGame(gameObject) {
     gameObject.physics.world.setBounds(0, 0, w, h);
 }
 
-function onCollideWithBall(b1, b2) {
-    b1.destroy();
-    b2.destroy();
-}
-
-function onCollideWithWall(ball) {
-    console.log("hello")
-
-}
-
 // Note to self: this part onwards (below this comment) are functions that sits in a Phaser.scene module and is connected via 
 // scene: {
 //     preload: preload,
@@ -66,54 +57,55 @@ function create() {
     // Set game size
     window.addEventListener('resize', () => resizeGame(this));
 
-    // Create red ball graphics
-    const ballGraphics = this.add.graphics();
-    ballGraphics.fillStyle(0xff0000, 1);
-    ballGraphics.fillCircle(20, 20, 20);
-    ballGraphics.generateTexture('ball', 40, 40);
-    ballGraphics.destroy();
+    // Create initial red ball
+    balls = createBall(this, 0xff0000, 20, 1);
 
-    // Create ball
-    balls = this.physics.add.group({
-        allowGravity: true,
-        bounceX: 1,
-        bounceY: 1,
-        collideWorldBounds: true,
-        velocityY: -300,
-        velocityX: Phaser.Math.Between(-200, 200),
-    })
-    // ball = this.physics.add.sprite(400, 300, 'ball');
-    balls.createMultiple([
-        { key: 'ball', quantity: 1, setXY: { x: 200, y: 300, stepX: 100 } },
-    ])
-
+    // Set up ball collisions
     this.physics.add.collider(balls, balls, onCollideWithBall);
+
+    // Ball to Ball collision
+    function onCollideWithBall(b1, b2) {
+        b1.destroy();
+        b2.destroy();
+    }
+
+    // Function to enable world bounds detection for a given ball
+    function enableWorldBounds(ball) {
+        ball.setCollideWorldBounds(true);
+        ball.setBounce(1);
+        ball.body.onWorldBounds = true;
+    }
+
+    // Enable world bounds for the initially created balls
+    balls.children.iterate((ball) => {
+        enableWorldBounds(ball);
+    });
+
+    // Add world bounds collision event
+    this.physics.world.on('worldbounds', (body) => {
+        if (body.gameObject) {
+            const ball = body.gameObject;
+            console.log('Ball hit world bounds! Creating new ball.');
+
+            // Create a new ball at a random position
+            let newBall = balls.create(Phaser.Math.Between(100, 700), 300, ball.texture.key);
+            newBall.setVelocity(Phaser.Math.Between(-200, 200), -300);
+            musicPlayer.playSongNote()
+
+            // Apply physics properties to new ball
+            enableWorldBounds(newBall);
+        }
+    });
 
     // Add keyboard controls
     cursors = this.input.keyboard.createCursorKeys();
-
-    // Add world bound collision event
-    this.physics.world.on('worldbounds', ball => {
-        console.log('kasjdh');
-        balls.createMultiple([
-            { key: 'ball', quantity: 1, setXY: { x: 200, y: 300, stepX: 100 } },
-        ])
-    });
-
-    // this.physics.world.on('collide', (gameObject1, gameObject2) => {
-    //     console.log('collision');
-    //     gameObject1.destroy();
-    //     gameObject2.destroy();
-    //     // gameObject1.emit('collide', gameObject2);
-    //     // gameObject2.emit('collide', gameObject1);
-    // });
 }
 
+
 function update() {
-    // Add simple paddle control with arrow keys
-    // if (cursors.left.isDown) {
-    //     ball.setVelocityX(-300);
-    // } else if (cursors.right.isDown) {
-    //     ball.setVelocityX(300);
-    // }
+    if (cursors.left.isDown) {
+        balls.setVelocityX(-300);
+    } else if (cursors.right.isDown) {
+        balls.setVelocityX(300);
+    }
 }
