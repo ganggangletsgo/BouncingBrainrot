@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import * as simpleSongs from '../songs/simplesongs';
+import MusicPlayer from './music';
 
 // fix size to window size
 const config: Phaser.Types.Core.GameConfig = {
@@ -21,6 +22,7 @@ const config: Phaser.Types.Core.GameConfig = {
 };
 
 const game = new Phaser.Game(config);
+const musicPlayer = new MusicPlayer()
 let balls;
 let cursors;
 
@@ -50,7 +52,7 @@ function onCollideWithWall(ball) {
 // Part of the config. So "this" refers to shit created in Phaser.scene object that is with Phaser.io library.
 
 function preload() {
-    loadNotes(this)
+    musicPlayer.loadNotes(this)
     console.log("hello")
 
 }
@@ -58,30 +60,8 @@ function preload() {
 
 
 function create() {
-    notes = {
-        'C': this.sound.add('C'),
-        'C-': this.sound.add('C-'),
-        'D': this.sound.add('D'),
-        'D-': this.sound.add('D-'),
-        'E': this.sound.add('E'),
-        'F': this.sound.add('F'),
-        'F-': this.sound.add('F-'),
-        'G': this.sound.add('G'),
-        'G-': this.sound.add('G-'),
-        'A': this.sound.add('A'),
-        'A-': this.sound.add('A-'),
-        'B': this.sound.add('B')
-    };
-
-
-    soundCounter = 0
-    this.input.keyboard.on('keydown-SPACE', () => {
-        let note = simpleSongs.twinkleTwinkle[soundCounter % (simpleSongs.twinkleTwinkle.length)]
-        if (note) {
-            notes[note].play();
-        }
-        soundCounter++
-    });
+    musicPlayer.initializeNotes(this)
+    musicPlayer.initializeSong(simpleSongs.furElise)
 
     // Set game size
     window.addEventListener('resize', () => resizeGame(this));
