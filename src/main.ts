@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
+import * as simpleSongs from '../songs/simplesongs';
+import MusicPlayer from './music';
 import { createBall, createRing } from './create';
 
 // fix size to window size
-
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     width: window.innerWidth,
@@ -22,6 +23,7 @@ const config: Phaser.Types.Core.GameConfig = {
 };
 
 const game = new Phaser.Game(config);
+const musicPlayer = new MusicPlayer()
 let balls;
 let cursors;
 
@@ -32,8 +34,6 @@ function resizeGame(gameObject) {
     gameObject.physics.world.setBounds(0, 0, w, h);
 }
 
-
-
 // Note to self: this part onwards (below this comment) are functions that sits in a Phaser.scene module and is connected via 
 // scene: {
 //     preload: preload,
@@ -43,10 +43,17 @@ function resizeGame(gameObject) {
 // Part of the config. So "this" refers to shit created in Phaser.scene object that is with Phaser.io library.
 
 function preload() {
-    // Load assets (none needed for basic shape)
+    musicPlayer.loadNotes(this)
+    console.log("hello")
+
 }
 
+
+
 function create() {
+    musicPlayer.initializeNotes(this)
+    musicPlayer.initializeSong(simpleSongs.furElise)
+
     // Set game size
     window.addEventListener('resize', () => resizeGame(this));
 
@@ -83,6 +90,7 @@ function create() {
             // Create a new ball at a random position
             let newBall = balls.create(Phaser.Math.Between(100, 700), 300, ball.texture.key);
             newBall.setVelocity(Phaser.Math.Between(-200, 200), -300);
+            musicPlayer.playSongNote()
 
             // Apply physics properties to new ball
             enableWorldBounds(newBall);
@@ -95,7 +103,6 @@ function create() {
 
 
 function update() {
-    // Add simple paddle control with arrow keys
     if (cursors.left.isDown) {
         balls.setVelocityX(-300);
     } else if (cursors.right.isDown) {
